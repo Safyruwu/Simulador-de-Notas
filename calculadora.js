@@ -10,6 +10,10 @@ const MAX_TOTAL = 100;
 const listEl = document.getElementById("evaluations-list");
 const addBtn = document.getElementById("add-btn");
 const resetBtn = document.getElementById("reset-btn");
+
+// Inyectar íconos en botones que no se pueden cambiar desde HTML sin tocar markup
+addBtn.innerHTML = `${ICONS.plus}<span>Agregar evaluación</span>`;
+resetBtn.innerHTML = `${ICONS.trash}<span>Limpiar todo</span>`;
 const resultEl = document.getElementById("result");
 const weightsSumEl = document.getElementById("weights-sum");
 const weightsWarningEl = document.getElementById("weights-warning");
@@ -64,6 +68,18 @@ function render() {
   const sumaActual = sumaPorcentajesActual();
   const topeAlcanzado = sumaActual >= MAX_TOTAL - 0.0001;
 
+  // Si la única fila está vacía, mostramos un empty state
+  if (
+    cantidadNueva === 1 &&
+    evaluaciones[0].nota === "" &&
+    evaluaciones[0].porcentaje === ""
+  ) {
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.innerHTML = `${ICONS.empty}<p>Agregá tu primera evaluación con el botón de abajo para empezar a calcular el promedio.</p>`;
+    listEl.appendChild(empty);
+  }
+
   evaluaciones.forEach((ev, idx) => {
     const row = document.createElement("div");
     row.className = "evaluation-row";
@@ -75,9 +91,9 @@ function render() {
     const inputBloqueado = !Number.isFinite(pctActual) && topeAlcanzado;
 
     row.innerHTML = `
-      <input type="number" step="any" placeholder="0" value="${ev.nota}" data-id="${ev.id}" data-field="nota" />
-      <input type="number" step="any" placeholder="0" value="${ev.porcentaje}" data-id="${ev.id}" data-field="porcentaje" ${inputBloqueado ? "disabled" : ""} />
-      <button type="button" class="remove-btn" data-id="${ev.id}" aria-label="Eliminar">×</button>
+      <input type="number" step="any" placeholder="0" value="${ev.nota}" data-id="${ev.id}" data-field="nota" aria-label="Nota" />
+      <input type="number" step="any" placeholder="0" value="${ev.porcentaje}" data-id="${ev.id}" data-field="porcentaje" ${inputBloqueado ? "disabled" : ""} aria-label="Porcentaje" />
+      <button type="button" class="remove-btn" data-id="${ev.id}" aria-label="Eliminar evaluación" title="Eliminar">${ICONS.trash}</button>
     `;
     listEl.appendChild(row);
   });
@@ -161,7 +177,7 @@ function recalcular(animarResultado = false) {
 // Eventos
 addBtn.addEventListener("click", () => {
   if (sumaPorcentajesActual() >= MAX_TOTAL - 0.0001) {
-    alert("Ya se alcanzó el 100% en los porcentajes. No se pueden agregar más evaluaciones.");
+    toast("Ya se alcanzó el 100% en los porcentajes. No se pueden agregar más evaluaciones.", "error", 3500);
     return;
   }
   evaluaciones.push({ id: uid(), nota: "", porcentaje: "" });
@@ -169,13 +185,21 @@ addBtn.addEventListener("click", () => {
   render();
 });
 
-resetBtn.addEventListener("click", () => {
-  if (!confirm("¿Borrar todas las evaluaciones?")) return;
+resetBtn.addEventListener("click", async () => {
+  const ok = await confirmar({
+    titulo: "¿Borrar todas las evaluaciones?",
+    mensaje: "Se eliminarán todas las notas y porcentajes cargados. Esta acción no se puede deshacer.",
+    okTexto: "Sí, borrar todo",
+    cancelTexto: "Cancelar",
+    danger: true,
+  });
+  if (!ok) return;
   evaluaciones = [];
   localStorage.removeItem(STORAGE_KEY);
   evaluaciones.push({ id: uid(), nota: "", porcentaje: "" });
   saveEvaluaciones();
   render();
+  toast("Evaluaciones reiniciadas", "success");
 });
 
 listEl.addEventListener("input", (e) => {
@@ -221,8 +245,26 @@ listEl.addEventListener("keydown", (e) => {
   // Permitir siempre: teclas de control y edición
   if (
     e.ctrlKey || e.metaKey || e.altKey ||
-    ["Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "Enter"].includes(e.key)
+    ["Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(e.key)
   ) {
+    return;
+  }
+
+  // Atajo: Enter en un input de la última fila → agregar nueva evaluación
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const filasActuales = listEl.querySelectorAll(".evaluation-row");
+    const esUltimaFila = target.closest(".evaluation-row") === filasActuales[filasActuales.length - 1];
+    if (esUltimaFila) {
+      addBtn.click();
+    } else {
+      // Mover foco al input del porcentaje de la misma fila
+      const mismaFila = target.closest(".evaluation-row");
+      const campos = mismaFila.querySelectorAll("input");
+      const idx = Array.from(campos).indexOf(target);
+      const siguiente = campos[idx + 1];
+      if (siguiente && !siguiente.disabled) siguiente.focus();
+    }
     return;
   }
 
@@ -236,6 +278,13 @@ listEl.addEventListener("keydown", (e) => {
 
   // Cualquier otra cosa: bloquear
   e.preventDefault();
+});
+
+// Atajo global: Escape para volver al inicio
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !e.target.matches("input, button, textarea, select")) {
+    window.location.href = "index.html";
+  }
 });
 
 // Limpiar lo pegado: dejar solo números y separador decimal

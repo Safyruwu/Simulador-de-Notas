@@ -1,0 +1,286 @@
+/* Toasts — mensajes que aparecen y se desvanecen automáticamente */
+
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  max-width: calc(100vw - 48px);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  border-left: 4px solid var(--accent);
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 240px;
+  max-width: 360px;
+  pointer-events: auto;
+  animation: toastIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.toast.toast-out {
+  animation: toastOut 0.25s ease-in both;
+}
+
+.toast-success {
+  border-left-color: var(--success);
+}
+
+.toast-error {
+  border-left-color: var(--danger);
+}
+
+.toast-info {
+  border-left-color: var(--accent);
+}
+
+.toast svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.toast-success svg { color: var(--success); }
+.toast-error svg { color: var(--danger); }
+.toast-info svg { color: var(--accent); }
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  to {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+  }
+}
+
+@media (max-width: 540px) {
+  .toast-container {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+  }
+
+  .toast {
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+/* Inline confirm — reemplazo de window.confirm() */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: overlayIn 0.2s ease-out both;
+}
+
+.confirm-dialog {
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  border-left: 4px solid var(--accent);
+  animation: dialogIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.confirm-dialog h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.confirm-dialog p {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.confirm-actions .btn {
+  width: auto;
+  margin: 0;
+  padding: 8px 16px;
+  font-size: 0.88rem;
+}
+
+.confirm-cancel {
+  background: var(--surface-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.confirm-cancel:hover {
+  background: var(--border);
+}
+
+.confirm-ok {
+  background: var(--accent);
+  color: #fff;
+}
+
+.confirm-ok:hover {
+  background: var(--accent-hover);
+}
+
+.confirm-ok.danger {
+  background: var(--danger);
+}
+
+.confirm-ok.danger:hover {
+  background: #8B2E2E;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dialogIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+}
+
+.empty-state svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+  color: var(--text-muted);
+}
+
+.empty-state p {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* Loading spinner */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  color: var(--text-muted);
+  gap: 12px;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Footer */
+.site-footer {
+  text-align: center;
+  margin-top: 40px;
+  padding: 20px 24px;
+  background: rgba(232, 220, 200, 0.08);
+  border: 1px solid rgba(232, 220, 200, 0.18);
+  border-radius: var(--radius);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--text-on-dark);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.site-footer-main {
+  font-weight: 600;
+  font-size: 0.9rem;
+  opacity: 0.95;
+}
+
+.site-footer-links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.site-footer-links a {
+  color: var(--text-on-dark);
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  opacity: 0.75;
+  border: 1px solid transparent;
+  transition: opacity var(--transition), background var(--transition), border-color var(--transition);
+}
+
+.site-footer-links a:hover {
+  opacity: 1;
+  background: rgba(232, 220, 200, 0.1);
+  border-color: rgba(232, 220, 200, 0.25);
+}
+
+.site-footer-meta {
+  font-size: 0.72rem;
+  opacity: 0.55;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

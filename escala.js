@@ -30,6 +30,13 @@ const els = {
   exportarBtn: document.getElementById("exportar-btn"),
 };
 
+// Inyectar íconos en los botones
+els.calcular.innerHTML = `${ICONS.check}<span>Calcular</span>`;
+els.ordenarAsc.innerHTML = `${ICONS.sortUp}<span>Orden ascendente</span>`;
+els.ordenarDesc.innerHTML = `${ICONS.sortDown}<span>Orden descendente</span>`;
+els.exportarBtn.innerHTML = `${ICONS.download}<span>Exportar a Excel</span>`;
+els.resetBtn.innerHTML = `${ICONS.trash}<span>Reiniciar valores</span>`;
+
 let filas = []; // [{ puntaje, nota }]
 let orden = "asc"; // "asc" o "desc"
 
@@ -135,10 +142,15 @@ function renderTabla() {
   const tablaWrapper = resultadoCard.querySelector(".tabla-wrapper");
 
   if (filas.length === 0) {
-    resultadoCard.hidden = true;
-    // Limpiamos el wrapper por si quedó contenido de un cálculo anterior
-    const old = tablaWrapper.querySelector(".tabla-grid");
-    if (old) old.remove();
+    resultadoCard.hidden = false;
+    resultadoCard.classList.remove("anim-card");
+    tablaWrapper.innerHTML = `
+      <div class="empty-state">
+        ${ICONS.empty}
+        <p>Presioná <strong>Calcular</strong> para generar la tabla de conversión a partir de tus parámetros.</p>
+      </div>
+    `;
+    els.resumen.textContent = "";
     return;
   }
 
@@ -182,9 +194,8 @@ function renderTabla() {
     wrapper.appendChild(tablaCol);
   });
 
-  // Limpiamos el wrapper viejo si existe y montamos el nuevo
-  const oldWrapper = tablaWrapper.querySelector(".tabla-grid");
-  if (oldWrapper) oldWrapper.remove();
+  // Limpiamos el wrapper completo (puede haber loading-state, empty-state o tabla previa)
+  tablaWrapper.innerHTML = "";
   tablaWrapper.appendChild(wrapper);
 
   resultadoCard.hidden = false;
@@ -227,7 +238,7 @@ function mostrarWarning(msgs) {
 }
 
 // Eventos
-els.calcular.addEventListener("click", () => {
+els.calcular.addEventListener("click", async () => {
   aplicarDefaultsSiVacio();
   const p = leerParametros();
   const problemas = validar(p);
@@ -238,6 +249,22 @@ els.calcular.addEventListener("click", () => {
     return;
   }
   mostrarWarning([]);
+
+  // Mostrar loading state
+  const resultadoCard = document.getElementById("resultado-card");
+  const tablaWrapper = resultadoCard.querySelector(".tabla-wrapper");
+  resultadoCard.hidden = false;
+  resultadoCard.classList.remove("anim-card");
+  tablaWrapper.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <span>Generando tabla...</span>
+    </div>
+  `;
+
+  // Pequeño delay para que se vea el spinner (UX)
+  await new Promise((r) => setTimeout(r, 200));
+
   filas = generarFilas(p);
   orden = "asc";
   renderTabla();
@@ -253,27 +280,34 @@ els.ordenarDesc.addEventListener("click", () => {
   renderTabla();
 });
 
-els.resetBtn.addEventListener("click", () => {
-  if (!confirm("¿Restablecer todos los parámetros a sus valores por defecto?")) return;
-  // Vaciar inputs (los placeholders del HTML definen los valores por defecto)
+els.resetBtn.addEventListener("click", async () => {
+  const ok = await confirmar({
+    titulo: "¿Restablecer todos los parámetros?",
+    mensaje: "Los campos volverán a sus valores predeterminados. La tabla calculada se borrará.",
+    okTexto: "Sí, reiniciar",
+    cancelTexto: "Cancelar",
+    danger: true,
+  });
+  if (!ok) return;
   els.puntajeMax.value = "";
   els.exigencia.value = "";
   els.notaMin.value = "";
   els.notaMax.value = "";
   els.notaAprob.value = "";
-  // Limpiar estado derivado y persistencia
   localStorage.removeItem(STORAGE_KEY);
   filas = [];
   orden = "asc";
   mostrarWarning([]);
   renderTabla();
+  toast("Parámetros reiniciados", "success");
 });
 
-// Exporta la tabla actual a un archivo .xls (formato XML que Excel abre nativamente).
-// Sin librerías externas: generamos HTML con estilo y lo servimos como .xls.
+// Exporta la tabla actual a un archivo .xlsx real (Office Open XML).
+// Usa SheetJS para generar un archivo que Excel, Google Sheets, WPS,
+// y apps móviles (Excel mobile, Sheets Android) abren sin advertencias.
 function exportarAExcel() {
   if (filas.length === 0) {
-    alert("Primero calculá la escala antes de exportar.");
+    toast("Primero calculá la escala antes de exportar.", "error", 3500);
     return;
   }
 
@@ -281,77 +315,55 @@ function exportarAExcel() {
   const datos = orden === "asc" ? [...filas] : [...filas].reverse();
   const notaAprobVal = Number.isFinite(p.notaAprob) ? p.notaAprob : 4.0;
 
-  // Construimos las filas como HTML
-  const filasHtml = datos
-    .map(
-      (f) =>
-        `<tr><td>${formatear(f.puntaje)}</td>` +
-        `<td style="color:${f.nota >= notaAprobVal ? '#2D5F2D' : '#8B2E2E'};font-weight:bold">${formatear(f.nota)}</td></tr>`
-    )
-    .join("");
-
-  // Cabecera con los parámetros usados
+  // Cabecera con los parámetros usados (primera fila de la hoja)
   const parametrosTxt =
     `Escala generada · Puntaje máx: ${formatear(p.puntajeMax)} · ` +
     `Exigencia: ${formatear(p.exigencia)}% · ` +
     `Notas: ${formatear(p.notaMin)} a ${formatear(p.notaMax)} · ` +
     `Aprobación: ${formatear(p.notaAprob)}`;
 
-  // Plantilla HTML/XML que Excel interpreta como libro
-  const contenido = `<!DOCTYPE html>
-<html xmlns:o="urn:schemas-microsoft-com:office:office"
-      xmlns:x="urn:schemas-microsoft-com:office:excel"
-      xmlns="http://www.w3.org/TR/REC-html40">
-<head>
-  <meta charset="UTF-8" />
-  <title>Escala de Notas</title>
-  <xml>
-    <x:ExcelWorkbook>
-      <x:ExcelWorksheets>
-        <x:ExcelWorksheet>
-          <x:Name>Escala</x:Name>
-          <x:WorksheetOptions>
-            <x:DisplayGridlines/>
-          </x:WorksheetOptions>
-        </x:ExcelWorksheet>
-      </x:ExcelWorksheets>
-    </x:ExcelWorkbook>
-  </xml>
-  <style>
-    body { font-family: Calibri, Arial, sans-serif; }
-    table { border-collapse: collapse; }
-    th, td { border: 1px solid #999; padding: 6px 12px; text-align: center; }
-    th { background: #DCCEB4; font-weight: bold; }
-    caption { padding: 8px; font-style: italic; color: #555; caption-side: top; }
-  </style>
-</head>
-<body>
-  <table>
-    <caption>${parametrosTxt}</caption>
-    <thead>
-      <tr><th>Puntaje</th><th>Nota</th></tr>
-    </thead>
-    <tbody>
-      ${filasHtml}
-    </tbody>
-  </table>
-</body>
-</html>`;
+  // Construimos la hoja: cabecera + filas con puntaje y nota numérica
+  const aoa = [
+    [parametrosTxt],
+    [],
+    ["Puntaje", "Nota"],
+    ...datos.map((f) => [Number(f.puntaje), Number(f.nota)]),
+  ];
 
-  // BOM para que Excel reconozca UTF-8 correctamente (tildes, comas, etc.)
-  const blob = new Blob(["﻿" + contenido], {
-    type: "application/vnd.ms-excel;charset=utf-8",
-  });
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
 
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
+  // Merge de la fila de cabecera para que ocupe las 2 columnas
+  ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
+
+  // Ancho de columnas
+  ws["!cols"] = [{ wch: 14 }, { wch: 14 }];
+
+  // Estilos: negrita a los headers y colores a la nota según aprobado/reprobado
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+  for (let R = 2; R <= range.e.r; R++) {
+    const nota = datos[R - 3]?.nota;
+    const cellRef = XLSX.utils.encode_cell({ r: R, c: 1 });
+    if (ws[cellRef] && Number.isFinite(nota)) {
+      const esAprob = nota >= notaAprobVal;
+      ws[cellRef].s = {
+        font: {
+          bold: true,
+          color: { rgb: esAprob ? "FF2D5F2D" : "FF8B2E2E" },
+        },
+      };
+    }
+  }
+  // Estilo al header de columnas
+  if (ws["A3"]) ws["A3"].s = { font: { bold: true } };
+  if (ws["B3"]) ws["B3"].s = { font: { bold: true } };
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Escala");
+
+  // Generar el .xlsx como binario y descargarlo
   const fecha = new Date().toISOString().slice(0, 10);
-  a.download = `escala-notas-${fecha}.xls`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  XLSX.writeFile(wb, `escala-notas-${fecha}.xlsx`);
+  toast("Archivo exportado correctamente", "success");
 }
 
 els.exportarBtn.addEventListener("click", exportarAExcel);
@@ -382,3 +394,15 @@ function cargarParametros() {
 });
 
 cargarParametros();
+renderTabla();
+
+// Atajo: Ctrl/Cmd + Enter para calcular desde cualquier input
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    e.preventDefault();
+    els.calcular.click();
+  }
+  if (e.key === "Escape" && !e.target.matches("input, button, textarea, select")) {
+    window.location.href = "index.html";
+  }
+});

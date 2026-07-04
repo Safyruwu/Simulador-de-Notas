@@ -4,9 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calculadora de Notas</title>
-  <link rel="stylesheet" href="theme.css?v=4" />
+  <link rel="stylesheet" href="theme.css?v=6" />
   <link rel="stylesheet" href="animations.css" />
-  <link rel="stylesheet" href="calculadora.css?v=2" />
+  <link rel="stylesheet" href="toasts.css?v=2" />
+  <link rel="stylesheet" href="calculadora.css?v=3" />
 </head>
 <body>
   <main class="container">
@@ -25,7 +26,7 @@
 
       <div id="evaluations-list"></div>
 
-      <button id="add-btn" type="button" class="btn btn-secondary">+ Agregar evaluación</button>
+      <button id="add-btn" type="button" class="btn btn-secondary">Agregar evaluación</button>
 
       <div class="weights-info">
         Suma de porcentajes: <strong id="weights-sum">0%</strong>
@@ -33,15 +34,17 @@
       </div>
     </section>
 
-    <section class="card result-card">
+    <section class="card result-card" aria-live="polite">
       <h2>Promedio</h2>
-      <div id="result" class="result">—</div>
+      <div id="result" class="result" aria-label="Promedio calculado">—</div>
       <p class="hint">Si la suma de pesos no es 100%, el promedio se calcula proporcionalmente sobre los pesos ingresados.</p>
     </section>
 
     <button id="reset-btn" type="button" class="btn btn-ghost">Limpiar todo</button>
   </main>
 
-  <script src="calculadora.js?v=2"></script>
+  <script src="ui.js"></script>
+  <script src="calculadora.js?v=3"></script>
+  <script src="footer.js?v=2"></script>
 </body>
 </html>
