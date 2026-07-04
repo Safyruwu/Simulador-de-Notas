@@ -1,0 +1,136 @@
+/* Paleta del proyecto — café oscuro cálido */
+:root {
+  --bg-1: #2B1D14;          /* fondo café oscuro */
+  --bg-2: #1A1310;          /* negro carbón (más oscuro para gradiente) */
+  --surface: #E8DCC8;       /* crema tostado (tarjetas, superficies) */
+  --surface-alt: #DCCEB4;   /* crema tostado más oscuro (hover, secondary) */
+  --surface-deep: #3A2A1E;  /* superficie marrón para cards sobre fondo oscuro */
+  --accent: #C2622D;        /* cobre / naranja quemado */
+  --accent-hover: #A8511F;  /* acento más oscuro para hover */
+  --accent-soft: rgba(194, 98, 45, 0.15);
+  --text: #1A1310;          /* negro carbón */
+  --text-on-dark: #E8DCC8;  /* texto crema sobre fondo oscuro */
+  --text-muted: #6B5A4A;    /* texto secundario sobre crema */
+  --border: #C9B89A;        /* borde sutil sobre crema */
+  --success: #4A7A4A;       /* verde para aprobado */
+  --success-soft: #DCEAD8;
+  --danger: #B85A52;        /* rojo para reprobado */
+  --danger-soft: #F0D8D2;
+  --warning: #C88A2A;
+  --warning-soft: #F0DFB8;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.18);
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.4);
+  --transition: 0.18s ease;
+}
+
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Estilos base compartidos por todas las páginas */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Tres capas en el fondo, de arriba a abajo:
+     1) Viñeta sutil en los bordes
+     2) Grano de ruido (textura)
+     3) Gradiente radial cálido que "ilumina" desde el centro */
+  background:
+    radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.35) 100%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+    radial-gradient(ellipse at top, #3D2818 0%, var(--bg-1) 45%, var(--bg-2) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  padding: 32px 20px;
+  color: var(--text);
+  line-height: 1.55;
+  font-feature-settings: "cv11", "ss01", "ss03";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+h1 {
+  color: var(--text-on-dark);
+  font-size: 2.1rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 8px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+h2 {
+  letter-spacing: -0.015em;
+}
+
+.subtitle {
+  color: var(--text-on-dark);
+  opacity: 0.8;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-on-dark);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  padding: 8px 16px 8px 12px;
+  background: rgba(232, 220, 200, 0.08);
+  border: 1px solid rgba(232, 220, 200, 0.2);
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: background var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.back-link::before {
+  content: "←";
+  font-size: 1rem;
+  transition: transform var(--transition);
+}
+
+.back-link:hover {
+  background: rgba(232, 220, 200, 0.15);
+  border-color: var(--accent);
+  text-decoration: none;
+  transform: translateX(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.back-link:hover::before {
+  transform: translateX(-3px);
+}
+
+.back-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Focus visible global para accesibilidad */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}

@@ -1,0 +1,245 @@
+/* Calculadora de Notas — estilos (paleta cálida café/cobre) */
+/* Reset, body, container, h1, subtitle y back-link viven en theme.css */
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 26px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--accent);
+  color: var(--text);
+}
+
+.card h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+  color: var(--text);
+  text-align: left;
+  letter-spacing: -0.01em;
+}
+
+.evaluations-header,
+.evaluation-row {
+  display: grid;
+  grid-template-columns: 1fr 110px 40px;
+  gap: 10px;
+  align-items: center;
+}
+
+.evaluations-header {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 700;
+  padding: 0 4px 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.evaluation-row {
+  margin-bottom: 8px;
+  padding: 4px 0;
+  transition: opacity var(--transition);
+}
+
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--text);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  font-variant-numeric: tabular-nums;
+}
+
+input[type="text"]:hover,
+input[type="number"]:hover:not(:disabled) {
+  border-color: var(--text-muted);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+input[type="number"]:disabled {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  border-color: var(--border);
+  opacity: 0.7;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  opacity: 0.5;
+}
+
+/* Ocultar flechas del number input pero mantener funcionalidad */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.remove-btn {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  width: 36px;
+  height: 36px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.remove-btn:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--transition), transform 0.08s ease, box-shadow var(--transition);
+  letter-spacing: 0.01em;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-secondary {
+  background: var(--accent);
+  color: #fff;
+  margin-top: 10px;
+  width: 100%;
+  padding: 12px 18px;
+}
+
+.btn-secondary:hover {
+  background: var(--accent-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-ghost {
+  background: var(--surface-alt);
+  color: var(--text);
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  width: 100%;
+  padding: 10px 18px;
+}
+
+.btn-ghost:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.weights-info {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: var(--surface-alt);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.weights-info strong {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.05rem;
+}
+
+.warning {
+  display: block;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: var(--warning-soft);
+  color: var(--warning);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  border-left: 3px solid var(--warning);
+  font-weight: 500;
+}
+
+.result-card {
+  text-align: center;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface-alt) 100%);
+}
+
+.result {
+  font-size: 3.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 8px 0 4px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: 6px;
+}
+
+@media (max-width: 540px) {
+  .evaluations-header {
+    display: none;
+  }
+
+  .evaluation-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "nota peso"
+      "remove remove";
+    gap: 8px;
+    padding: 12px;
+    background: var(--surface-alt);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+
+  .evaluation-row input:nth-child(1) { grid-area: nota; }
+  .evaluation-row input:nth-child(2) { grid-area: peso; }
+  .evaluation-row button { grid-area: remove; justify-self: end; }
+
+  .card {
+    padding: 20px;
+  }
+
+  .result {
+    font-size: 3rem;
+  }
+}
