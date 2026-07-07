@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://safyruwu.github.io/simulador-de-notas/sitemap.xml
+Sitemap: https://safyruwu.github.io/Simulador-de-Notas/sitemap.xml
